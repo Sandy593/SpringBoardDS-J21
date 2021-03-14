@@ -34,7 +34,7 @@ exploring the data, and getting acquainted with the 3 tables. */
 /* Q1: Some of the facilities charge a fee to members, but some do not.
 Write a SQL query to produce a list of the names of the facilities that do. */
 
-SELECT *
+SELECT name
 FROM Facilities
 WHERE membercost > 0.0;
 
@@ -51,7 +51,7 @@ facilities in question. */
 
 SELECT facid, name, membercost, monthlymaintenance
 FROM Facilities
-WHERE membercost < 0.2 * monthlymaintenance;
+WHERE membercost != 0 AND membercost < 0.2 * monthlymaintenance;
 
 /* Q4: Write an SQL query to retrieve the details of facilities with ID 1 and 5.
 Try writing the query without using the OR operator. */
@@ -66,8 +66,8 @@ more than $100. Return the name and monthly maintenance of the facilities
 in question. */
 
 SELECT name, monthlymaintenance,
-    CASE WHEN monthlymaintenance > 100 THEN 'cheap'
-    ELSE 'expensive' END AS affordable
+    CASE WHEN monthlymaintenance > 100 THEN 'expensive'
+    ELSE 'cheap' END AS affordable
 FROM Facilities;
 
 
@@ -76,8 +76,7 @@ who signed up. Try not to use the LIMIT clause for your solution. */
 
 SELECT firstname, surname
 FROM Members
-ORDER BY joindate DESC
-LIMIT 0 , 100;
+WHERE joindate = (SELECT MAX(joindate) FROM Members);
 
 /* Q7: Produce a list of all members who have used a tennis court.
 Include in your output the name of the court, and the name of the member
@@ -102,7 +101,7 @@ facility, the name of the member formatted as a single column, and the cost.
 Order by descending cost, and do not use any subqueries. */
 
 SELECT f.name AS Facilityname, CONCAT(m.firstname, ' ', m.surname) AS Membername, 
-CASE WHEN b.memid = 0 THEN b.slots * 2 * f.guestcost ELSE b.slots * 2 * f.membercost END AS cost
+CASE WHEN b.memid = 0 THEN b.slots * f.guestcost ELSE b.slots * f.membercost END AS cost
 FROM Bookings AS b
 	INNER JOIN Facilities AS f
 		ON b.facid = f.facid
@@ -116,9 +115,9 @@ ORDER BY cost DESC
 
 SELECT *
 FROM (
-	SELECT f.name AS FacilityName, CONCAT(m.firstname, ' ', m.surname) AS Membername, 
-    CASE WHEN b.memid = 0 THEN b.slots * 2 * f.guestcost
-           ELSE b.slots * 2 * f.membercost END AS cost
+SELECT f.name AS FacilityName, CONCAT(m.firstname, ' ', m.surname) AS Membername, 
+    CASE WHEN b.memid = 0 THEN b.slots * f.guestcost
+           ELSE b.slots * f.membercost END AS cost
     FROM Bookings as b
     INNER JOIN Facilities AS f
     USING (facid)
