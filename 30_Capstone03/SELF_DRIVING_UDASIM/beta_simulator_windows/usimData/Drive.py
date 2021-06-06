@@ -28,7 +28,7 @@ def img_preprocess(img):
  
  
 @sio.on('telemetry')
-def telemetry(sid, data):
+def telemetry(sio, data):
     speed = float(data['speed'])
     image = Image.open(BytesIO(base64.b64decode(data['image'])))
     image = np.asarray(image)
@@ -42,7 +42,7 @@ def telemetry(sid, data):
  
  
 @sio.on('connect')
-def connect(sid, environ):
+def connect(sio, environ):
     print('Connected')
     send_control(0, 15)
  
